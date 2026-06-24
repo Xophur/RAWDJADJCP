@@ -6,10 +6,10 @@ from pymongo.errors import DuplicateKeyError
 import os
 import io
 import jwt
+import secrets
 import html as html_lib
 import logging
 import hashlib
-import random
 import string
 from pathlib import Path
 from pydantic import BaseModel, Field
@@ -64,7 +64,7 @@ class VerifyResponse(BaseModel):
 
 def _make_serial(seq: int) -> str:
     year = datetime.now(timezone.utc).year
-    rand = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    rand = "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(6))
     return f"RAWDJA-{year}-{seq:05d}-{rand}"
 
 
@@ -281,13 +281,13 @@ async def require_teacher(request: Request) -> dict:
     token = auth[7:]
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGO])
+        if payload.get("scope") != "teacher":
+            raise HTTPException(status_code=401, detail="Invalid access scope.")
+        return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Access expired. Unlock again with your certificate.")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid access token.")
-    if payload.get("scope") != "teacher":
-        raise HTTPException(status_code=401, detail="Invalid access scope.")
-    return payload
 
 
 @api_router.post("/teacher/unlock")
