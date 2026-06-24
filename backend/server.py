@@ -1,10 +1,11 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Response
+from fastapi import FastAPI, APIRouter, HTTPException, Response, Depends, Request
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import DuplicateKeyError
 import os
 import io
+import jwt
 import html as html_lib
 import logging
 import hashlib
@@ -13,7 +14,7 @@ import string
 from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle
@@ -22,12 +23,17 @@ from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.colors import HexColor
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, HRFlowable
 
+from teacher_content import TEACHER_GUIDE, EDITORIAL, GLOSSARY, COURSE_META
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+JWT_SECRET = os.environ['JWT_SECRET']
+JWT_ALGO = "HS256"
 
 app = FastAPI(title="RAWDJA / The Needle Drop API")
 api_router = APIRouter(prefix="/api")
@@ -252,6 +258,106 @@ async def downloads_pdf(req: PdfRequest):
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
     )
+
+# ----------------------------- Teacher gate (cert-unlocked) -----------------------------
+class UnlockRequest(BaseModel):
+    serial: str
+
+
+def _create_teacher_token(serial: str, name: str) -> str:
+    payload = {
+        "serial": serial,
+        "name": name,
+        "scope": "teacher",
+        "exp": datetime.now(timezone.utc) + timedelta(hours=12),
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGO)
+
+
+async def require_teacher(request: Request) -> dict:
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Teacher access token required.")
+    token = auth[7:]
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGO])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Access expired. Unlock again with your certificate.")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid access token.")
+    if payload.get("scope") != "teacher":
+        raise HTTPException(status_code=401, detail="Invalid access scope.")
+    return payload
+
+
+@api_router.post("/teacher/unlock")
+async def teacher_unlock(req: UnlockRequest):
+    serial = req.serial.strip()
+    doc = await db.certificates.find_one({"serial": serial}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=403, detail="That certificate serial was not found. Enter a valid RAWDJA serial.")
+    expected = _compute_hash(doc["serial"], doc["name"], doc["issued_at"], doc["seq"], doc["prev_hash"])
+    if expected != doc["hash"]:
+        raise HTTPException(status_code=403, detail="Certificate failed integrity check.")
+    token = _create_teacher_token(doc["serial"], doc["name"])
+    return {"token": token, "holder": doc["name"], "serial": doc["serial"]}
+
+
+@api_router.get("/teacher/content")
+async def get_teacher_content(_=Depends(require_teacher)):
+    return {
+        "course": COURSE_META,
+        "guide": TEACHER_GUIDE,
+        "editorial": EDITORIAL,
+        "glossary": GLOSSARY,
+    }
+
+
+def _teacher_blocks() -> List[PdfBlock]:
+    b: List[PdfBlock] = [PdfBlock(t="cover", text=COURSE_META["title"], sub=COURSE_META["subtitle"], edition="TEACHER'S EDITION")]
+    b.append(PdfBlock(t="h1", text="How to use this guide"))
+    b.append(PdfBlock(t="p", text=TEACHER_GUIDE["intro"]))
+    b.append(PdfBlock(t="h2", text="Learning objectives"))
+    for o in TEACHER_GUIDE["objectives"]:
+        b.append(PdfBlock(t="li", text=o))
+    b.append(PdfBlock(t="pagebreak"))
+    b.append(PdfBlock(t="h1", text="Lesson plans"))
+    for l in TEACHER_GUIDE["lessons"]:
+        b.append(PdfBlock(t="h2", text=f"{l['module']}  ({l['duration']})"))
+        b.append(PdfBlock(t="p", text=f"Objective: {l['objective']}"))
+        for a in l["activities"]:
+            b.append(PdfBlock(t="li", text=a))
+    b.append(PdfBlock(t="pagebreak"))
+    b.append(PdfBlock(t="h1", text="Discussion questions"))
+    for i, q in enumerate(TEACHER_GUIDE["discussion"], 1):
+        b.append(PdfBlock(t="li", text=f"Q{i}. {q}"))
+    b.append(PdfBlock(t="h2", text="Assessment ideas"))
+    for a in TEACHER_GUIDE["assessmentIdeas"]:
+        b.append(PdfBlock(t="li", text=a))
+    b.append(PdfBlock(t="pagebreak"))
+    b.append(PdfBlock(t="h1", text="Glossary"))
+    for g in GLOSSARY:
+        b.append(PdfBlock(t="p", text=f"{g['term']} — {g['def']}"))
+    b.append(PdfBlock(t="h2", text="Further resources"))
+    for r in TEACHER_GUIDE["resources"]:
+        b.append(PdfBlock(t="li", text=f"{r['type']}: {r['text']}"))
+    b.append(PdfBlock(t="h2", text="Editorial process (3-pass review)"))
+    for p in EDITORIAL["passes"]:
+        b.append(PdfBlock(t="p", text=p["pass"]))
+        b.append(PdfBlock(t="note", text=p["note"]))
+    return b
+
+
+@api_router.post("/teacher/pdf")
+async def teacher_pdf(_=Depends(require_teacher)):
+    pdf_bytes = _build_pdf(_teacher_blocks())
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": 'attachment; filename="The-Needle-Drop-Teachers-Edition.pdf"'},
+    )
+
+
 
 
 app.include_router(api_router)
