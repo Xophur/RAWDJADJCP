@@ -89,7 +89,7 @@ async def issue_certificate(req: CertificateRequest):
     # safe under concurrency: if two requests grab the same `seq`, the loser
     # gets a DuplicateKeyError and simply retries against the new head.
     for _ in range(8):
-        last = await db.certificates.find_one(sort=[("seq", -1)])
+        last = await db.certificates.find_one(sort=[("seq", -1)], projection={"seq": 1, "hash": 1, "_id": 0})
         seq = (last["seq"] + 1) if last else 1
         prev_hash = last["hash"] if last else GENESIS_HASH
 
