@@ -2,6 +2,7 @@ from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo.errors import DuplicateKeyError
 import os
 import logging
 import hashlib
@@ -69,26 +70,34 @@ async def issue_certificate(req: CertificateRequest):
     if not name:
         raise HTTPException(status_code=400, detail="Name is required")
 
-    # Find the latest certificate to chain to.
-    last = await db.certificates.find_one(sort=[("seq", -1)])
-    seq = (last["seq"] + 1) if last else 1
-    prev_hash = last["hash"] if last else GENESIS_HASH
+    # Append to the hash-linked ledger. A unique index on `seq` makes this
+    # safe under concurrency: if two requests grab the same `seq`, the loser
+    # gets a DuplicateKeyError and simply retries against the new head.
+    for _ in range(8):
+        last = await db.certificates.find_one(sort=[("seq", -1)])
+        seq = (last["seq"] + 1) if last else 1
+        prev_hash = last["hash"] if last else GENESIS_HASH
 
-    issued_at = datetime.now(timezone.utc).isoformat()
-    serial = _make_serial(seq)
-    cert_hash = _compute_hash(serial, name, issued_at, seq, prev_hash)
+        issued_at = datetime.now(timezone.utc).isoformat()
+        serial = _make_serial(seq)
+        cert_hash = _compute_hash(serial, name, issued_at, seq, prev_hash)
 
-    cert = Certificate(
-        serial=serial,
-        name=name,
-        course="The Needle Drop — History of DJ & Rave Culture",
-        issued_at=issued_at,
-        seq=seq,
-        prev_hash=prev_hash,
-        hash=cert_hash,
-    )
-    await db.certificates.insert_one(cert.model_dump())
-    return cert
+        cert = Certificate(
+            serial=serial,
+            name=name,
+            course="The Needle Drop — History of DJ & Rave Culture",
+            issued_at=issued_at,
+            seq=seq,
+            prev_hash=prev_hash,
+            hash=cert_hash,
+        )
+        try:
+            await db.certificates.insert_one(cert.model_dump())
+            return cert
+        except DuplicateKeyError:
+            continue
+
+    raise HTTPException(status_code=503, detail="Ledger is busy, please retry.")
 
 
 @api_router.get("/certificates/verify/{serial}", response_model=VerifyResponse)
@@ -137,7 +146,7 @@ app.include_router(api_router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
     allow_methods=["*"],
     allow_headers=["*"],
@@ -146,6 +155,13 @@ app.add_middleware(
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+
+@app.on_event("startup")
+async def ensure_indexes():
+    # Unique seq guarantees the append-only ledger cannot fork under concurrency.
+    await db.certificates.create_index("seq", unique=True)
+    await db.certificates.create_index("serial", unique=True)
 
 
 @app.on_event("shutdown")
