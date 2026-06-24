@@ -7,12 +7,26 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        display: ['Unbounded', 'sans-serif'],
+        body: ['Manrope', 'sans-serif'],
+        monox: ['"Space Mono"', 'monospace'],
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)'
       },
       colors: {
+        ink: '#090514',
+        surface: '#130A2A',
+        cardp: '#1A0F3D',
+        neon: {
+          green: '#39FF14',
+          orange: '#FF5E00',
+          blue: '#00F0FF',
+          magenta: '#FF2BD6',
+        },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -56,20 +70,12 @@ module.exports = {
       },
       keyframes: {
         'accordion-down': {
-          from: {
-            height: '0'
-          },
-          to: {
-            height: 'var(--radix-accordion-content-height)'
-          }
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' }
         },
         'accordion-up': {
-          from: {
-            height: 'var(--radix-accordion-content-height)'
-          },
-          to: {
-            height: '0'
-          }
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' }
         }
       },
       animation: {
