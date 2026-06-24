@@ -8,6 +8,7 @@ import Chapter from "@/pages/Chapter";
 import TeachersGuide from "@/pages/TeachersGuide";
 import Downloads from "@/pages/Downloads";
 import Certificate from "@/pages/Certificate";
+import VerifyCertificate from "@/pages/VerifyCertificate";
 import PrintEdition from "@/pages/PrintEdition";
 
 function Shell() {
@@ -24,6 +25,8 @@ function Shell() {
           <Route path="/teachers-guide" element={<TeachersGuide />} />
           <Route path="/downloads" element={<Downloads />} />
           <Route path="/certificate" element={<Certificate />} />
+          <Route path="/verify" element={<VerifyCertificate />} />
+          <Route path="/verify/:serial" element={<VerifyCertificate />} />
           <Route path="/print/:edition" element={<PrintEdition />} />
         </Routes>
       </main>

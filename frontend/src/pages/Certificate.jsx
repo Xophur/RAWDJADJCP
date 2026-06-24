@@ -69,7 +69,7 @@ function CertificateCard({ cert }) {
         </div>
 
         <p className="mt-6 font-mono-x text-[10px] uppercase tracking-widest text-white/40">
-          Verify authenticity at xophur.com · serial {cert.serial}
+          Verify at xophur.com/verify/{cert.serial}
         </p>
       </div>
     </div>
@@ -249,6 +249,15 @@ export default function Certificate() {
                 <Printer className="w-4 h-4" /> Download / Print
               </button>
             </div>
+            <a
+              href={`/verify/${cert.serial}`}
+              target="_blank"
+              rel="noreferrer"
+              data-testid="cert-verify-link"
+              className="no-print inline-flex items-center gap-1.5 mb-4 text-neon-blue hover:underline text-xs font-mono-x uppercase tracking-wide"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" /> Open your public verify link → /verify/{cert.serial}
+            </a>
             <CertificateCard cert={cert} />
           </div>
         )}
