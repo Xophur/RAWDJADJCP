@@ -12,19 +12,23 @@ Xophur — 31-year DJ career. Students: DJ Sivart, Soundjack, GalaxyBoy, Psybod 
 - Content: /app/frontend/src/data/content.js (6 modules, glossary, full teacher's guide, editorial notes); assets in /app/frontend/src/data/assets.js.
 
 ## Implemented (2026-06-24)
-- 6 modules: Sound Systems, Pirate Radio, Hip-Hop/Turntablism, House & Techno, Rave Culture, Bonus (Corporate vs Real + Goblin Mode case study using instructor's own photos).
-- Themed interactive reader (hero, bento module grid, chapter pages with pull quotes + key terms, prev/next).
-- Teacher's Guide page: objectives, 6 lesson plans, discussion questions, assessments, glossary, resources, 3-pass editorial provenance.
-- Downloads: print-ready Student Edition (/print/student) + Teacher's Edition (/print/teacher) via browser "Save as PDF".
-- RAWDJA Certificate: issue (name → ledger cert w/ serial, seq, SHA-256 hash, Founder badge for seq=1) + verify (serial → Authentic/Not verified) + ledger integrity endpoint. Ledger reset to 0 so first live issuance = Founder No. 1.
-- Tested: testing_agent iteration_1 — backend 100% (9/9), frontend 100% (18/18).
+- 6 modules + themed reader, bonus Goblin Mode case study (Trowl face shots removed for privacy; only non-identifying photos shown).
+- Teacher's Guide: now GATED — unlocked by a valid RAWDJA certificate serial (JWT, 12h, scope 'teacher'). Teacher content moved server-side (/app/backend/teacher_content.py) so the gate is real (not bypassable from the JS bundle).
+- Downloads: REAL downloadable PDF files (reportlab, server-generated). Student Edition public; Teacher's Edition PDF protected by teacher token. Print views kept as "view online".
+- RAWDJA Certificate: asks for "Full DJ Name". Hash-linked ledger (SHA-256), unique seq+serial index, retry-on-duplicate. Founder No. 1 = "Jason Theory", serial RAWDJA-2026-00001-QQ2EDR (the master unlock key).
+- Endpoints: /api/teacher/unlock, /api/teacher/content, /api/teacher/pdf (gated); /api/downloads/pdf (public); certificates issue/verify/integrity/stats.
+- Tested: iteration_1 (base) + iteration_2 (gating, PDFs, DJ-name) — both 100% backend & frontend.
+
+## Owner note
+- Instructor brand "Xophur"; DJ name "Jason Theory". Ran 1 of 3 Delaware rave companies during the RAVE Act (2002). Founder of RAWDJA. Hosting: xophur.com.
 
 ## Backlog / Next
-- P1: Real NFT certificates (testnet first, then Polygon mainnet) — deferred per user (verifiable ledger chosen for launch).
-- P1: Copy-to-clipboard for certificate serial/hash; public verify deep-link (/verify/:serial).
-- P2: Audio embeds of cited tracks (Planet Rock, Acid Tracks, Strings of Life) where licensing allows.
-- P2: Server-generated PDF files (currently browser print-to-PDF).
-- P2: Migrate FastAPI on_event handlers to lifespan; tighten CORS allow_origins for production domain (xophur.com).
-- Deployment: point xophur.com at the app.
+- P1: Per-region franchisee accounts (evolve beyond single-serial unlock); franchise dashboard.
+- P1: Public shareable verify URL (/verify/:serial); copy-to-clipboard for serial/hash.
+- P1: Real NFT certs (testnet -> Polygon) — deferred (hash-ledger chosen for launch).
+- P2: axios 401 interceptor to auto-clear teacher token; CORS_ORIGINS lockdown for prod; FastAPI lifespan migration; guide_version field.
+- Deployment: push to user's GitHub for review, then DigitalOcean / point xophur.com (subdomain rawdja.xophur.com recommended).
+
+## Original Architecture / Personas (unchanged)
 
 ## No auth in this product.
