@@ -30,7 +30,7 @@ function CertificateCard({ cert }) {
         <h2 className="mt-4 font-display font-black uppercase tracking-tighter text-3xl sm:text-4xl">
           Certificate of <span className="text-neon-green">Completion</span>
         </h2>
-        <p className="mt-6 text-white/60 text-sm uppercase tracking-wide">This certifies that</p>
+        <p className="mt-6 text-white/60 text-sm uppercase tracking-wide">This certifies that the DJ</p>
         <p className="mt-2 font-display font-extrabold uppercase tracking-tight text-3xl sm:text-5xl text-neon-orange text-glow-orange break-words">
           {cert.name}
         </p>
@@ -95,7 +95,7 @@ export default function Certificate() {
 
   const issue = async () => {
     if (name.trim().length < 2) {
-      setError("Please enter your full name.");
+      setError("Please enter your full DJ name.");
       return;
     }
     setError("");
@@ -165,14 +165,15 @@ export default function Certificate() {
 
           {tab === "issue" && (
             <div className="mt-8 bg-cardp border border-white/10 rounded-md p-6 sm:p-8">
-              <label className="font-display uppercase text-sm tracking-tight text-neon-green">Your full name</label>
-              <div className="mt-3 flex flex-col sm:flex-row gap-3">
+              <label className="font-display uppercase text-sm tracking-tight text-neon-green">Your full DJ name</label>
+              <p className="text-white/50 text-xs mt-1 mb-3">This is the name that will appear on your official RAWDJA certificate — use your DJ name exactly how you want it credited.</p>
+              <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   data-testid="certificate-name-input"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && issue()}
-                  placeholder="e.g. Xophur"
+                  placeholder="e.g. Jason Theory"
                   className="flex-1 bg-ink border border-white/15 rounded-sm px-4 py-3 text-white placeholder-white/30 focus:border-neon-green focus:outline-none"
                 />
                 <button

@@ -21,30 +21,25 @@ export const ART = {
 };
 
 // Instructor's own underground rave photos — the "Goblin Mode" real-rave case study.
+// NOTE: close-up shots that clearly show a performer's face are intentionally
+// omitted to protect the privacy of the artist (Trowl). Only privacy-safe,
+// non-identifying shots are featured publicly.
 export const RAVE_PHOTOS = [
   {
-    url: "https://customer-assets.emergentagent.com/job_e7674e70-447e-4b7a-9b67-37a42ec03236/artifacts/4rncqe9q_13572.jpg",
-    caption: "The drive out — no fixed address, just a password and coordinates.",
-  },
-  {
-    url: "https://customer-assets.emergentagent.com/job_e7674e70-447e-4b7a-9b67-37a42ec03236/artifacts/ceogrz5o_13381.jpg",
-    caption: "Decks in the dirt: Pioneer CDJs run off a road case beside the stack.",
-  },
-  {
     url: "https://customer-assets.emergentagent.com/job_e7674e70-447e-4b7a-9b67-37a42ec03236/artifacts/0jww8yg5_13550.jpg",
-    caption: "Back-to-back in the red glow — a DJ and a producer trading the booth.",
+    caption: "The drive out — no fixed address, just a password and a set of coordinates.",
   },
   {
     url: "https://customer-assets.emergentagent.com/job_e7674e70-447e-4b7a-9b67-37a42ec03236/artifacts/uoej8e0c_13553.jpg",
-    caption: "Graffiti, ivy, and a KRK monitor — the rig is the venue.",
+    caption: "The H-shaped ruins lit blood-red — the rig is the stage and the woods are the walls.",
   },
   {
-    url: "https://customer-assets.emergentagent.com/job_e7674e70-447e-4b7a-9b67-37a42ec03236/artifacts/iqrbnsq2_13574.jpg",
-    caption: "The flyer: GOBLIN MODE — 18+, 10pm–damn. DM the password for the location.",
+    url: "https://customer-assets.emergentagent.com/job_e7674e70-447e-4b7a-9b67-37a42ec03236/artifacts/ceogrz5o_13381.jpg",
+    caption: "The flyer: GOBLIN MODE — 18+, 10pm–damn. DM the password GOBLIN for the location.",
   },
 ];
 
-// The full-bleed crowd shot used as the case-study hero.
+// The full-bleed crowd shot used as the case-study hero (no identifiable faces).
 export const RAVE_HERO =
   "https://customer-assets.emergentagent.com/job_e7674e70-447e-4b7a-9b67-37a42ec03236/artifacts/uoej8e0c_13553.jpg";
 

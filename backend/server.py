@@ -1,9 +1,11 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import DuplicateKeyError
 import os
+import io
+import html as html_lib
 import logging
 import hashlib
 import random
@@ -12,6 +14,13 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime, timezone
+
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.colors import HexColor
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, HRFlowable
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -140,6 +149,109 @@ async def ledger_integrity():
 async def stats():
     total = await db.certificates.count_documents({})
     return {"certificates_issued": total}
+
+
+# ----------------------------- PDF export -----------------------------
+class PdfBlock(BaseModel):
+    t: str                       # cover | kicker | h1 | h2 | p | quote | terms | li | note | pagebreak | rule
+    text: Optional[str] = None
+    sub: Optional[str] = None    # for cover subtitle
+    edition: Optional[str] = None
+
+
+class PdfRequest(BaseModel):
+    filename: str = "the-needle-drop.pdf"
+    blocks: List[PdfBlock]
+
+
+C_ORANGE = HexColor("#D94B00")
+C_GREEN = HexColor("#1E8E00")
+C_BLUE = HexColor("#0090A8")
+C_INK = HexColor("#15131C")
+C_MUTED = HexColor("#5B5566")
+
+
+def _styles():
+    base = ParagraphStyle("base", fontName="Helvetica", fontSize=10.5, leading=16, textColor=C_INK)
+    return {
+        "cover_title": ParagraphStyle("cover_title", parent=base, fontName="Helvetica-Bold", fontSize=34, leading=38, alignment=TA_CENTER, textColor=C_INK),
+        "cover_sub": ParagraphStyle("cover_sub", parent=base, fontSize=12, leading=18, alignment=TA_CENTER, textColor=C_MUTED),
+        "cover_edition": ParagraphStyle("cover_edition", parent=base, fontName="Helvetica-Bold", fontSize=13, alignment=TA_CENTER, textColor=C_GREEN),
+        "kicker": ParagraphStyle("kicker", parent=base, fontName="Helvetica-Bold", fontSize=9, leading=12, textColor=C_ORANGE, spaceAfter=2),
+        "h1": ParagraphStyle("h1", parent=base, fontName="Helvetica-Bold", fontSize=22, leading=26, textColor=C_INK, spaceBefore=10, spaceAfter=8),
+        "h2": ParagraphStyle("h2", parent=base, fontName="Helvetica-Bold", fontSize=14, leading=18, textColor=C_GREEN, spaceBefore=12, spaceAfter=4),
+        "p": ParagraphStyle("p", parent=base, spaceAfter=8),
+        "quote": ParagraphStyle("quote", parent=base, fontName="Helvetica-BoldOblique", fontSize=13, leading=18, textColor=C_ORANGE, leftIndent=14, spaceBefore=6, spaceAfter=10, borderColor=C_ORANGE),
+        "terms": ParagraphStyle("terms", parent=base, fontSize=9.5, leading=14, textColor=C_BLUE, spaceBefore=4, spaceAfter=6),
+        "li": ParagraphStyle("li", parent=base, leftIndent=14, bulletIndent=2, spaceAfter=4),
+        "note": ParagraphStyle("note", parent=base, fontSize=9.5, leading=14, textColor=C_MUTED, spaceAfter=6),
+    }
+
+
+def _esc(t: str) -> str:
+    return html_lib.escape(t or "")
+
+
+def _build_pdf(blocks: List[PdfBlock]) -> bytes:
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buf, pagesize=letter,
+        leftMargin=0.9 * inch, rightMargin=0.9 * inch,
+        topMargin=0.85 * inch, bottomMargin=0.8 * inch,
+        title="The Needle Drop",
+    )
+    st = _styles()
+    story = []
+    for b in blocks:
+        if b.t == "pagebreak":
+            story.append(PageBreak())
+        elif b.t == "rule":
+            story.append(Spacer(1, 6))
+            story.append(HRFlowable(width="100%", thickness=1, color=C_GREEN))
+            story.append(Spacer(1, 6))
+        elif b.t == "cover":
+            story.append(Spacer(1, 1.6 * inch))
+            story.append(Paragraph(_esc(b.text or "The Needle Drop"), st["cover_title"]))
+            story.append(Spacer(1, 0.2 * inch))
+            if b.sub:
+                story.append(Paragraph(_esc(b.sub), st["cover_sub"]))
+            story.append(Spacer(1, 0.35 * inch))
+            if b.edition:
+                story.append(Paragraph(_esc(b.edition), st["cover_edition"]))
+            story.append(Spacer(1, 0.5 * inch))
+            story.append(Paragraph("Rave And Warehouse DJ Association &middot; A non-profit professional association", st["note"]))
+            story.append(PageBreak())
+        elif b.t == "kicker":
+            story.append(Paragraph(_esc(b.text).upper(), st["kicker"]))
+        elif b.t == "h1":
+            story.append(Paragraph(_esc(b.text), st["h1"]))
+        elif b.t == "h2":
+            story.append(Paragraph(_esc(b.text), st["h2"]))
+        elif b.t == "p":
+            story.append(Paragraph(_esc(b.text), st["p"]))
+        elif b.t == "quote":
+            story.append(Paragraph("&ldquo;" + _esc(b.text) + "&rdquo;", st["quote"]))
+        elif b.t == "terms":
+            story.append(Paragraph("<b>Key terms:</b> " + _esc(b.text), st["terms"]))
+        elif b.t == "li":
+            story.append(Paragraph("&bull;&nbsp;&nbsp;" + _esc(b.text), st["li"]))
+        elif b.t == "note":
+            story.append(Paragraph(_esc(b.text), st["note"]))
+    doc.build(story)
+    return buf.getvalue()
+
+
+@api_router.post("/downloads/pdf")
+async def downloads_pdf(req: PdfRequest):
+    pdf_bytes = _build_pdf(req.blocks)
+    safe_name = "".join(c for c in req.filename if c.isalnum() or c in "-_.") or "the-needle-drop.pdf"
+    if not safe_name.lower().endswith(".pdf"):
+        safe_name += ".pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+    )
 
 
 app.include_router(api_router)
