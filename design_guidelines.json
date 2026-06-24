@@ -1,0 +1,92 @@
+{
+  "project_name": "History of DJing & Rave Culture",
+  "theme": "Dark",
+  "archetype": "7 (Electric & Neon)",
+  "colors": {
+    "background": {
+      "base": "#090514",
+      "surface": "#130A2A",
+      "card": "#1A0F3D"
+    },
+    "text": {
+      "primary": "#F2F5FF",
+      "secondary": "#A594FD",
+      "accent": "#00F0FF"
+    },
+    "accents": {
+      "neon_green": "#39FF14",
+      "neon_orange": "#FF5E00",
+      "electric_blue": "#00F0FF",
+      "magenta": "#FF2BD6"
+    }
+  },
+  "typography": {
+    "headings": {
+      "fontFamily": "'Unbounded', sans-serif",
+      "weight": "800",
+      "letterSpacing": "tracking-tighter",
+      "casing": "uppercase"
+    },
+    "body": {
+      "fontFamily": "'Manrope', sans-serif",
+      "weight": "400",
+      "lineHeight": "leading-relaxed"
+    }
+  },
+  "layout": {
+    "spacing": "Generous Spacing: p-6, p-12, p-24. Padding inside cards. Avoid cramming.",
+    "grids": {
+      "general": "Mode A (Tetris Grid) - Asymmetrical, bento-style with varying column spans.",
+      "teacher_guide": "Mode B (Control Room) - Denser, structured bento grid with strict data hierarchy."
+    },
+    "surfaces": "Retro-Futurism (Terminal Look). Containers use 1px borders with subtle neon drop-shadows. No soft blurred shadows."
+  },
+  "components": {
+    "cards": "Dark background (`bg-[#1A0F3D]`) with `border border-[#39FF14]/30`. On hover: `border-[#FF5E00]` and add a drop-shadow glow. Sharp corners or max `rounded-md`.",
+    "buttons": "Flat solid background. Primary CTA: `bg-[#FF5E00] text-black`. Hover states: lighten hue and add drop-shadow glow. No pill shapes, stick to sharp/slight radius.",
+    "navigation": "Sticky glassmorphism header: `backdrop-blur-xl bg-[#090514]/80`, `border-b border-white/10`. Nav links should have high contrast.",
+    "gallery": "Asymmetric masonry grid with hover scale and slight rotation on images. Always use a dark purple gradient overlay `bg-gradient-to-t from-[#090514] via-transparent to-transparent` to blend images into the background.",
+    "reader": "Narrow column `max-w-prose` for readability. Pull quotes should have a thick left border in neon orange."
+  },
+  "motion": {
+    "transitions": "Fast, energetic. `transition-all duration-200 ease-out`.",
+    "hover": "Scale 1.02, border color shift to neon green/orange, glow effect.",
+    "scrolling": "Smooth scrolling effects. Fade-in up staggered animations for chapter cards and lists."
+  },
+  "image_urls": [
+    {
+      "category": "hero",
+      "url": "https://images.pexels.com/photos/9005459/pexels-photo-9005459.jpeg",
+      "description": "DJ mixing music in vibrant nightclub. Use with heavy dark purple overlay for text contrast."
+    },
+    {
+      "category": "hip_hop_turntablism",
+      "url": "https://images.pexels.com/photos/32589034/pexels-photo-32589034.jpeg",
+      "description": "Hands of DJ playing vinyl on turntables. Perfect for Hip-hop chapter."
+    },
+    {
+      "category": "rave_gallery_1",
+      "url": "https://images.unsplash.com/photo-1542628682-88321d2a4828?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2OTV8MHwxfHNlYXJjaHw0fHx1bmRlcmdyb3VuZCUyMGRqJTIwcmF2ZSUyMG5pZ2h0fGVufDB8fHx8MTc4MjMyMDkxOXww&ixlib=rb-4.1.0&q=85",
+      "description": "Underground rave scene (Goblin Mode proxy)."
+    },
+    {
+      "category": "rave_gallery_2",
+      "url": "https://images.pexels.com/photos/14470108/pexels-photo-14470108.jpeg",
+      "description": "Intense lighting over dynamic crowd. Good for EDM chapter."
+    },
+    {
+      "category": "corporate_festival",
+      "url": "https://images.unsplash.com/photo-1619229665486-19f7ee2987a5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwxfHxtYXNzaXZlJTIwY29ycG9yYXRlJTIwbXVzaWMlMjBmZXN0aXZhbCUyMHN0YWdlfGVufDB8fHx8MTc4MjMyMDkxOXww&ixlib=rb-4.1.0&q=85",
+      "description": "Massive daytime corporate festival stage. Use for contrasting real raves vs corporate festivals."
+    }
+  ],
+  "instructions_to_main_agent": [
+    "Ensure all interactive and informational elements have `data-testid` attributes (kebab-case, role-based).",
+    "Use 'Unbounded' for headings (H1-H4) and 'Manrope' for body text. Import them via Google Fonts.",
+    "Avoid generic Tailwind colors (like blue-500, gray-100). Rely strictly on the neon hex codes provided in this guide.",
+    "Implement 'Tracing Beam' or glowing borders for chapter cards to enhance the retro-tech EDM aesthetic.",
+    "The Teacher's Guide view must feel distinct: apply a 'Control Room' grid layout—denser, more analytical than the immersive main chapters.",
+    "Add dark overlays (`bg-black/50` or `bg-gradient-to-t from-[#090514]`) to all hero and full-bleed images to ensure text readability.",
+    "Do not use placeholder image URLs. Use the exact provided image_urls for authentic underground vibe."
+  ]
+}
