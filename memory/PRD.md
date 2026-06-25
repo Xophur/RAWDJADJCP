@@ -31,4 +31,15 @@ Xophur — 31-year DJ career. Students: DJ Sivart, Soundjack, GalaxyBoy, Psybod 
 
 ## Original Architecture / Personas (unchanged)
 
+## Promoter Program added (2026-06-24)
+- NEW second certification: "The Promoter" at /promoter (DJ stays at root). Same functionality: 6-module reader, certificate-gated Teacher's Edition, RAWDJA certificate, public verify, downloadable PDFs.
+- Promoter modules (3-pass edited, researched): The Host (Mancuso/Loft 1970), Reach (flyers→password drop), Building the Night (booking/production), The Money (door→financial products), The Law (permits/RAVE Act), and bonus Duty of Care (harm reduction/DanceSafe, Goblin Mode case study).
+- Per-program ledger: certificates tagged `program`; serials RAWDJA-DJ-... and RAWDJA-PRMO-...; independent seq + hash chains; unique (program, seq) index. Each program has its own Founder No. 1.
+- Cross-program lock: a DJ certificate cannot unlock the Promoter Teacher's Edition and vice versa (JWT scoped to program; 403 enforced server-side, friendly message client-side).
+- Frontend is program-aware via /app/frontend/src/data/programs.js registry; pages take a `program` prop; Nav/Footer have a DJ⇄Promoter switcher; per-program teacher token localStorage keys.
+- Public shareable verify deep-link added: /verify/:serial (auto-verifies any serial from either program).
+- CertificateRequest.program validated via Literal (422 on bad input).
+- Tested: iteration_3 — backend 100% (22/22) incl. cross-program lock both directions; frontend 100%.
+- Ledger wiped to 0 for launch.
+
 ## No auth in this product.

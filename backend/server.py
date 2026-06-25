@@ -13,7 +13,7 @@ import hashlib
 import string
 from pathlib import Path
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Literal
 from datetime import datetime, timezone, timedelta
 
 from reportlab.lib.pagesizes import letter
@@ -51,7 +51,7 @@ COURSE_NAMES = {
 
 class CertificateRequest(BaseModel):
     name: str = Field(..., min_length=2, max_length=80)
-    program: str = "dj"
+    program: Literal["dj", "promoter"] = "dj"
 
 
 class Certificate(BaseModel):
