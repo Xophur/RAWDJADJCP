@@ -7,6 +7,7 @@ import {
 import {
   getTeacherToken, clearTeacherToken, unlockTeacher, fetchTeacherContent, downloadTeacherPdf,
 } from "../lib/teacher";
+import { getProgram } from "../data/programs";
 import { Reveal } from "../components/Reveal";
 import { RawdjaSeal } from "../components/RawdjaSeal";
 
@@ -20,7 +21,8 @@ const Panel = ({ icon: Icon, title, children, color = "green", testid }) => (
   </div>
 );
 
-function UnlockGate({ onUnlocked }) {
+function UnlockGate({ program, onUnlocked }) {
+  const prog = getProgram(program);
   const [serial, setSerial] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -31,6 +33,12 @@ function UnlockGate({ onUnlocked }) {
     setLoading(true);
     try {
       const data = await unlockTeacher(serial);
+      if (data.program !== program) {
+        const other = getProgram(data.program).label;
+        setError(`That serial is a ${other} certificate. Use a ${prog.label} certificate to unlock this guide.`);
+        setLoading(false);
+        return;
+      }
       onUnlocked(data.holder);
     } catch (e) {
       setError(e.response?.data?.detail || "Could not unlock. Check your certificate serial.");
@@ -85,7 +93,7 @@ function UnlockGate({ onUnlocked }) {
 
         <p className="mt-6 text-center text-white/50 text-sm">
           Don't have a certificate yet?{" "}
-          <Link to="/certificate" className="text-neon-green hover:underline inline-flex items-center gap-1">
+          <Link to={`${prog.base}/certificate`} className="text-neon-green hover:underline inline-flex items-center gap-1">
             <Award className="w-3.5 h-3.5" /> Complete the course & get certified
           </Link>
         </p>
@@ -94,32 +102,33 @@ function UnlockGate({ onUnlocked }) {
   );
 }
 
-export default function TeachersGuide() {
+export default function TeachersGuide({ program = "dj" }) {
+  const prog = getProgram(program);
   const [content, setContent] = useState(null);
   const [holder, setHolder] = useState("");
   const [checking, setChecking] = useState(true);
   const [pdfLoading, setPdfLoading] = useState(false);
 
   const load = useCallback(async () => {
-    if (!getTeacherToken()) {
+    if (!getTeacherToken(program)) {
       setChecking(false);
       return;
     }
     try {
-      const data = await fetchTeacherContent();
+      const data = await fetchTeacherContent(program);
       setContent(data);
     } catch (e) {
-      clearTeacherToken();
+      clearTeacherToken(program);
       setContent(null);
     } finally {
       setChecking(false);
     }
-  }, []);
+  }, [program]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { setChecking(true); setContent(null); load(); }, [load]);
 
   const lock = () => {
-    clearTeacherToken();
+    clearTeacherToken(program);
     setContent(null);
     setHolder("");
   };
@@ -127,9 +136,9 @@ export default function TeachersGuide() {
   const getPdf = async () => {
     setPdfLoading(true);
     try {
-      await downloadTeacherPdf();
+      await downloadTeacherPdf(program);
     } catch (e) {
-      clearTeacherToken();
+      clearTeacherToken(program);
       setContent(null);
     } finally {
       setPdfLoading(false);
@@ -145,7 +154,7 @@ export default function TeachersGuide() {
   }
 
   if (!content) {
-    return <UnlockGate onUnlocked={() => load()} />;
+    return <UnlockGate program={program} onUnlocked={() => load()} />;
   }
 
   const { guide, glossary, editorial } = content;

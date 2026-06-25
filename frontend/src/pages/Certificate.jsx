@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Award, Printer, ShieldCheck, ShieldAlert, Loader2, Search, Crown } from "lucide-react";
 import api from "../lib/api";
+import { getProgram } from "../data/programs";
 import { RawdjaSeal } from "../components/RawdjaSeal";
 import { Reveal } from "../components/Reveal";
 
@@ -76,7 +77,8 @@ function CertificateCard({ cert }) {
   );
 }
 
-export default function Certificate() {
+export default function Certificate({ program = "dj" }) {
+  const prog = getProgram(program);
   const [tab, setTab] = useState("issue");
   const [name, setName] = useState("");
   const [cert, setCert] = useState(null);
@@ -90,8 +92,8 @@ export default function Certificate() {
   const [count, setCount] = useState(null);
 
   useEffect(() => {
-    api.get("/stats").then((r) => setCount(r.data.certificates_issued)).catch(() => {});
-  }, []);
+    api.get("/stats").then((r) => setCount(r.data[program] ?? r.data.certificates_issued)).catch(() => {});
+  }, [program]);
 
   const issue = async () => {
     if (name.trim().length < 2) {
@@ -101,7 +103,7 @@ export default function Certificate() {
     setError("");
     setIssuing(true);
     try {
-      const r = await api.post("/certificates", { name: name.trim() });
+      const r = await api.post("/certificates", { name: name.trim(), program });
       setCert(r.data);
       setCount((c) => (c == null ? 1 : c + 1));
     } catch (e) {
@@ -130,17 +132,17 @@ export default function Certificate() {
       <div className="max-w-4xl mx-auto px-5 sm:px-8">
         <div className="no-print">
           <Reveal>
-            <span className="font-mono-x text-neon-green text-xs uppercase tracking-[0.3em]">RAWDJA · Official credential</span>
+            <span className="font-mono-x text-neon-green text-xs uppercase tracking-[0.3em]">RAWDJA · {prog.label}</span>
             <h1 className="mt-4 font-display font-black uppercase tracking-tighter text-4xl sm:text-6xl">
               Get <span className="text-neon-orange">Certified</span>
             </h1>
             <p className="mt-5 text-white/75 max-w-2xl leading-relaxed">
-              Finished the course? Issue your official certificate from the Rave And Warehouse DJ Association. Every
+              Finished the {prog.short} course? Issue your official certificate from the Rave And Warehouse DJ Association. Every
               certificate is written into a tamper-evident, hash-linked ledger and is publicly verifiable by serial number.
             </p>
             {count != null && (
               <p className="mt-3 font-mono-x text-xs uppercase tracking-widest text-neon-blue">
-                {count} certificate{count === 1 ? "" : "s"} issued to date
+                {count} {prog.short} certificate{count === 1 ? "" : "s"} issued to date
               </p>
             )}
           </Reveal>

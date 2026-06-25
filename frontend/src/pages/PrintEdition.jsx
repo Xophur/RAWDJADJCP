@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { Printer, ArrowLeft } from "lucide-react";
-import { COURSE, CHAPTERS, GLOSSARY } from "../data/content";
+import { getProgram } from "../data/programs";
 
-const PrintBar = ({ title }) => (
+const PrintBar = ({ title, base }) => (
   <div className="no-print sticky top-0 z-50 bg-ink/90 backdrop-blur border-b border-white/10 px-5 py-3 flex items-center justify-between">
-    <Link to="/downloads" className="inline-flex items-center gap-1.5 text-white/70 hover:text-neon-green text-xs uppercase tracking-wide font-semibold">
+    <Link to={`${base}/downloads`} className="inline-flex items-center gap-1.5 text-white/70 hover:text-neon-green text-xs uppercase tracking-wide font-semibold">
       <ArrowLeft className="w-4 h-4" /> Back
     </Link>
     <span className="font-display uppercase text-sm tracking-tight hidden sm:block">{title}</span>
@@ -19,36 +19,33 @@ const PrintBar = ({ title }) => (
   </div>
 );
 
-const Cover = () => (
-  <div className="print-page text-center py-16 border-b-2 border-black/20">
-    <div className="font-mono-x text-xs uppercase tracking-[0.4em] text-neon-orange">{COURSE.tagline}</div>
-    <h1 className="font-display font-black uppercase tracking-tighter text-5xl sm:text-6xl mt-6 leading-[0.95]">{COURSE.title}</h1>
-    <p className="mt-4 max-w-xl mx-auto text-white/70 print-surface leading-relaxed">{COURSE.subtitle}</p>
-    <div className="mt-8 inline-block border border-neon-green/40 px-6 py-2 font-display uppercase tracking-wide text-neon-green">Student Edition</div>
-    <p className="mt-10 font-mono-x text-xs uppercase tracking-widest text-white/40">
-      Rave And Warehouse DJ Association · A non-profit professional association
-    </p>
-  </div>
-);
-
-export default function PrintEdition() {
+export default function PrintEdition({ program = "dj" }) {
+  const prog = getProgram(program);
   const { edition } = useParams();
+  const { course, chapters, glossary, base } = prog;
 
   useEffect(() => {
-    document.title = `${COURSE.title} — Student Edition`;
-  }, []);
+    document.title = `${course.title} — Student Edition`;
+  }, [course.title]);
 
-  // Teacher's Edition is gated — route to the certificate-locked guide instead.
   if (edition === "teacher") {
-    return <Navigate to="/teachers-guide" replace />;
+    return <Navigate to={`${base}/teachers-guide`} replace />;
   }
 
   return (
     <div data-testid="print-student" className="bg-ink min-h-screen">
-      <PrintBar title="Student Edition" />
+      <PrintBar title="Student Edition" base={base} />
       <div className="px-5 sm:px-8 py-10">
-        <Cover />
-        {CHAPTERS.map((ch) => (
+        <div className="print-page text-center py-16 border-b-2 border-black/20">
+          <div className="font-mono-x text-xs uppercase tracking-[0.4em] text-neon-orange">{course.tagline}</div>
+          <h1 className="font-display font-black uppercase tracking-tighter text-5xl sm:text-6xl mt-6 leading-[0.95]">{course.title}</h1>
+          <p className="mt-4 max-w-xl mx-auto text-white/70 print-surface leading-relaxed">{course.subtitle}</p>
+          <div className="mt-8 inline-block border border-neon-green/40 px-6 py-2 font-display uppercase tracking-wide text-neon-green">Student Edition</div>
+          <p className="mt-10 font-mono-x text-xs uppercase tracking-widest text-white/40">
+            Rave And Warehouse DJ Association · A non-profit professional association
+          </p>
+        </div>
+        {chapters.map((ch) => (
           <section key={ch.id} className="print-page py-10 max-w-3xl mx-auto">
             <div className="flex items-baseline gap-3 mb-1">
               <span className="font-display font-black text-neon-orange text-2xl">{ch.num}</span>
@@ -56,7 +53,7 @@ export default function PrintEdition() {
             </div>
             <h2 className="font-display font-bold uppercase tracking-tight text-3xl mb-5">{ch.title}</h2>
             {ch.sections.map((s, i) => (
-              <div key={i} className="mb-7">
+              <div key={s.heading} className="mb-7">
                 <h3 className="font-display uppercase tracking-tight text-xl text-neon-green mb-3">{s.heading}</h3>
                 {s.paragraphs.map((p, j) => (
                   <p key={j} className="leading-[1.75] mb-3 print-surface text-white/85">{p}</p>
@@ -76,7 +73,7 @@ export default function PrintEdition() {
         <section className="py-10 max-w-3xl mx-auto">
           <h2 className="font-display font-bold uppercase tracking-tight text-3xl mb-6 text-neon-orange">Glossary</h2>
           <dl className="space-y-3">
-            {GLOSSARY.map((g) => (
+            {glossary.map((g) => (
               <div key={g.term}>
                 <dt className="font-display uppercase text-sm text-neon-green inline">{g.term}: </dt>
                 <dd className="inline print-surface text-white/80 text-sm">{g.def}</dd>

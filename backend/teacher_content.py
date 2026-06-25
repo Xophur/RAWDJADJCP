@@ -135,3 +135,111 @@ GLOSSARY = [
     {"term": "EDM", "def": "'Electronic Dance Music' — a 2010s marketing umbrella for the festival-scale commercial form of dance music."},
     {"term": "RAVE Act (2003)", "def": "US law (introduced by Senator Joe Biden in 2002) extending 'crack house' statutes to event organizers, criticized for chilling harm-reduction efforts."},
 ]
+
+# ============================ PROMOTER PROGRAM ============================
+PROMOTER_COURSE_META = {
+    "title": "The Promoter",
+    "subtitle": "How to build the night — from the Loft to the warehouse, the flyer to the algorithm, the door to the duty of care.",
+}
+
+PROMOTER_TEACHER_GUIDE = {
+    "intro": "This guide accompanies 'The Promoter' for use in promoter/event-production lessons — in person or virtual. Each module pairs history and theory with a hands-on producing exercise (build a flyer, draft a budget, plan a harm-reduction kit) so students leave able to actually throw a safe, well-run event. Time estimates assume a 60–75 minute session.",
+    "objectives": [
+        "Trace the promoter's craft from David Mancuso's Loft to today's gated-location underground.",
+        "Promote an event effectively across legacy (flyer, pirate radio) and modern (social, password drop) channels.",
+        "Curate a lineup, source a sound system, and write a run-of-show.",
+        "Build an event budget and calculate a break-even point before booking.",
+        "Plan for the law (permits, capacity, liability, the RAVE Act) and, above all, for harm reduction and duty of care.",
+    ],
+    "lessons": [
+        {"module": "Module 1 — The Host", "duration": "60 min",
+         "objective": "Students explain why the promoter's real product is a feeling and a safe space, using the Loft as origin.",
+         "activities": [
+             "Mini-lecture: Mancuso, the Loft, the non-commercial/invite model (15 min).",
+             "Discussion: what 'feeling' does a great party sell, and how is it engineered? (15 min).",
+             "Exercise: define the vibe, crowd, and one rule for an imaginary party in three sentences (30 min)."]},
+        {"module": "Module 2 — Reach", "duration": "60 min",
+         "objective": "Students design promotion that fills a floor while protecting an underground event.",
+         "activities": [
+             "Mini-lecture: flyer culture, pirate radio, the gated-location/password model (15 min).",
+             "Exercise: design a flyer (paper or digital) with date, lineup, vibe, and rules (30 min).",
+             "Discussion: where is the line between hype and exposing a party to risk? (15 min)."]},
+        {"module": "Module 3 — Production", "duration": "75 min",
+         "objective": "Students plan the logistics that turn a space into a venue.",
+         "activities": [
+             "Mini-lecture: booking, riders, sound-system hire, venue choice (15 min).",
+             "Exercise: build a run-of-show from load-in to load-out for a 4-act night (35 min).",
+             "Exercise: sequence a 4-artist lineup (opener -> peak -> close) and justify it (25 min)."]},
+        {"module": "Module 4 — The Money", "duration": "75 min",
+         "objective": "Students build a budget and find the break-even point.",
+         "activities": [
+             "Mini-lecture: revenue vs. cost, presales, ticketing platforms, corporate rollups (20 min).",
+             "Exercise: draft a full event budget and calculate break-even attendance (40 min).",
+             "Discussion: break-even community party vs. scalable financial product — which are you? (15 min)."]},
+        {"module": "Module 5 — The Law", "duration": "60 min",
+         "objective": "Students identify legal obligations and the RAVE Act's chilling effect.",
+         "activities": [
+             "Mini-lecture: permits, capacity, liability, the RAVE Act (2003) (20 min).",
+             "Debate: does the RAVE Act make events safer or more dangerous? (20 min).",
+             "Exercise: write a one-page door/capacity/ID plan for an event (20 min)."]},
+        {"module": "Module 6 — Duty of Care (Bonus)", "duration": "75 min",
+         "objective": "Students design a complete harm-reduction plan for an event.",
+         "activities": [
+             "Mini-lecture: harm reduction, DanceSafe, cool-down/medical/water, safer spaces (20 min).",
+             "Case study: examine 'Goblin Mode' — what did the crew get right and what would you add? (20 min).",
+             "Capstone exercise: build a harm-reduction & safety plan (water, cooling, medical, sober point, exits) (35 min)."]},
+    ],
+    "discussion": [
+        "If the promoter's product is 'a feeling,' how do you measure whether you delivered it?",
+        "Mancuso refused to sell anything at the Loft. What did that buy him, and what would it cost a promoter today?",
+        "When does marketing a secret party start to endanger it?",
+        "Is a break-even free party 'more real' than a profitable ticketed one? Defend your view.",
+        "Should a promoter book a bigger headliner they can't really afford to fill the room? Why or why not?",
+        "The RAVE Act can treat safety measures as evidence of guilt. As a promoter, how do you respond?",
+        "Whose responsibility is an attendee's safety — theirs, the promoter's, or both? Where are the limits?",
+        "What is the minimum harm-reduction setup you would refuse to throw a party without?",
+        "Why do communities trust some promoters for decades and abandon others after one night?",
+    ],
+    "assessmentIdeas": [
+        "Event plan: students submit a one-page plan (vibe, venue, lineup, budget, break-even, safety) for a hypothetical party.",
+        "Budget exercise: build a budget and correctly calculate break-even attendance.",
+        "Flyer + promo plan: a flyer plus a 3-channel promotion strategy.",
+        "Capstone: a complete harm-reduction & duty-of-care plan, graded on whether it would actually get everyone home safe.",
+    ],
+    "resources": [
+        {"type": "Book", "text": "Tim Lawrence — Love Saves the Day: A History of American Dance Music Culture, 1970–1979."},
+        {"type": "Book", "text": "Simon Reynolds — Energy Flash: A Journey Through Rave Music and Dance Culture."},
+        {"type": "Org", "text": "DanceSafe (dancesafe.org) — harm-reduction resources and the 'Amend the RAVE Act' campaign."},
+        {"type": "Topic", "text": "Resident Advisor & DICE — modern ticketing/capacity tools for events."},
+        {"type": "Topic", "text": "Local event permitting, occupancy limits, and liability insurance basics for your region."},
+    ],
+}
+
+PROMOTER_EDITORIAL = {
+    "passes": [
+        {"pass": "Pass 1 — Accuracy", "note": "Verified: David Mancuso's Loft ('Love Saves the Day', Feb 14, 1970, 647 Broadway, invite-only/no-sales model); DanceSafe founded 1998 (San Francisco Bay Area); the RAVE Act (introduced 2002, passed 2003 as the Illicit Drug Anti-Proliferation Act, expanding 21 U.S.C. 856) with civil penalties up to $250,000 and criminal penalties up to 20 years, plus the 2018 DOJ clarification on water/education; SFX Entertainment (2012 founding, 2013 IPO, 2016 bankruptcy -> LiveStyle); Live Nation's 2013 majority stake in Insomniac."},
+        {"pass": "Pass 2 — Clarity & fluff-cut", "note": "Each module reduced to one promoter takeaway; replaced vague advice with concrete, teachable tasks (budget, run-of-show, flyer, safety plan)."},
+        {"pass": "Pass 3 — Grammar & re-verification", "note": "Corrected grammar and consistency, then re-checked facts; first-person/instructor claims are framed as perspective, not asserted fact."},
+    ]
+}
+
+PROMOTER_GLOSSARY = [
+    {"term": "Promoter", "def": "The person who organizes, funds, books, markets, and takes responsibility for an event."},
+    {"term": "Musical host", "def": "Mancuso's term for the curator of a party — room, sound, and crowd over performance."},
+    {"term": "Gated location", "def": "Releasing the venue address only to people who request it with a password."},
+    {"term": "Rider", "def": "A document listing an artist's required gear, hospitality, and travel for a booking."},
+    {"term": "Run-of-show", "def": "The minute-by-minute schedule of an event, from load-in to last call."},
+    {"term": "Capacity", "def": "The maximum safe number of people for a space — a hard limit, not a target."},
+    {"term": "Break-even", "def": "The revenue point at which an event's income covers its costs."},
+    {"term": "Harm reduction", "def": "Practical measures (water, cooling, medical, drug-checking) that reduce risk to attendees."},
+    {"term": "DanceSafe", "def": "US non-profit (1998) that pioneered free drug-checking and harm-reduction education at events."},
+    {"term": "RAVE Act (2003)", "def": "US law extending 'crack house' statutes to event organizers; criticized for chilling harm reduction."},
+    {"term": "Duty of care", "def": "The promoter's moral and practical responsibility for everyone's safety at their event."},
+]
+
+# Program registry consumed by the API.
+PROGRAMS = {
+    "dj": {"course": COURSE_META, "guide": TEACHER_GUIDE, "editorial": EDITORIAL, "glossary": GLOSSARY, "code": "DJ"},
+    "promoter": {"course": PROMOTER_COURSE_META, "guide": PROMOTER_TEACHER_GUIDE, "editorial": PROMOTER_EDITORIAL, "glossary": PROMOTER_GLOSSARY, "code": "PRMO"},
+}
+PROGRAM_CODES = {"dj": "DJ", "promoter": "PRMO"}

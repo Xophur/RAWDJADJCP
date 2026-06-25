@@ -1,0 +1,31 @@
+{
+  "summary": "Iteration 3 — Promoter program addition. Backend pytest: 22/22 PASS covering per-program certificate issuance (RAWDJA-DJ-... and RAWDJA-PRMO-... serials with independent seq + hash chains), /api/stats {certificates_issued, dj, promoter}, ledger integrity with per-program head_hashes, teacher unlock returning program, /api/teacher/content?program=X and /api/teacher/pdf?program=X with cross-program 403 lock in BOTH directions (DJ-token vs promoter content => 403; promoter-token vs dj content => 403), 401 without token, verify returns program in cert. Frontend Playwright: /promoter loads 'THE PROMOTER' hero with 6 chapter cards; /promoter/chapter/promoter-origins renders (body 6.7KB); bonus /promoter/chapter/harm-reduction shows 'Goblin Mode' content; nav-switch-program toggles DJ<->Promoter; /promoter/certificate issues serial RAWDJA-PRMO-2026-00005-HE54MX and /certificate issues RAWDJA-DJ-2026-00006-ANL0LH; /promoter/teachers-guide rejects DJ serial with error 'That serial is a DJ Certification certificate. Use a Promoter Certification certificate to unlock this guide.' and stays locked; promoter serial unlocks the promoter guide (6 lessons + teacher PDF btn); reverse direction blocked with 'That serial is a Promoter Certification certificate. Use a DJ Certification certificate...' (gate stays); DJ serial unlocks /teachers-guide (6 lessons); per-program localStorage keys confirmed: rawdja_teacher_token_dj & rawdja_teacher_token_promoter; /promoter/downloads + /downloads show student & teacher buttons; shared /verify and /verify/:serial work for both DJ and Promoter serials. No issues found.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py _program_for() silently coerces invalid program param to 'dj' before comparing to token. If a promoter token requests program='bogus', it normalizes to 'dj' and returns 403 (good outcome), but it would be cleaner to 400 on bad program names.",
+    "server.py CertificateRequest defaults program='dj' and unknown values silently fall back to 'dj'. Consider Pydantic Literal['dj','promoter'] for explicit 422 on bad input (currently returns dj cert silently).",
+    "server.py: startup index migration tries db.certificates.drop_index('seq_1') on every boot — fine but noisy; once migrated everywhere, this can be removed.",
+    "server.py still uses deprecated @app.on_event('startup'/'shutdown'); migrate to FastAPI lifespan handlers.",
+    "server.py CORS uses allow_origins default '*' from CORS_ORIGINS env; pin to known origins in prod (already safe because allow_credentials=False).",
+    "teacher_content.py: large constants live alongside DJ + Promoter content; if a 3rd program is added, consider splitting per-program modules under a content/ package.",
+    "Frontend per-program localStorage keys ('rawdja_teacher_token_dj' / '_promoter') are correct, but consider also auto-clearing on 401 from /api/teacher/* so the gate reappears without a manual lock click."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/iteration_3.json",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "success_rate": {"backend": "100% (22/22)", "frontend": "100%"},
+  "test_credentials": "No login. Test serials created during this run — DJ: RAWDJA-DJ-2026-00006-ANL0LH (TEST UI DJ Holder), RAWDJA-DJ-2026-00007-NGPDB2 (TEST UI DJ Two). Promoter: RAWDJA-PRMO-2026-00005-HE54MX (TEST UI Promo Holder), RAWDJA-PRMO-2026-00006-59X0KJ (TEST UI PR Two). Founder DJ serial RAWDJA-2026-00001-QQ2EDR from iteration 2 may no longer exist if ledger was wiped — backend tests no longer depend on it; they create fresh fixtures.",
+  "seed_data_creation": "Backend pytest fixtures create TEST_DJ Holder, TEST_Promoter Holder, plus TEST_DJ/Promo Chain One/Two and TEST_*Independence certs. Frontend created TEST UI DJ/Promo holder certs via the issue UI. Ledger is append-only — these remain by design.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "RAWDJA now has two independent programs ('dj' at root /, 'promoter' at /promoter). Serial formats: RAWDJA-DJ-YYYY-#####-XXXXXX and RAWDJA-PRMO-YYYY-#####-XXXXXX. Per-program JWT token keys in localStorage: rawdja_teacher_token_dj and rawdja_teacher_token_promoter. Backend cross-program lock returns 403 with detail 'This certificate does not unlock that program's Teacher's Edition.' — the frontend shows user-friendly messages 'That serial is a {DJ|Promoter} Certification certificate. Use a {Promoter|DJ} Certification certificate to unlock this guide.' Promoter chapter slugs include: promoter-origins, harm-reduction (bonus with Goblin Mode gallery). DJ chapter slugs unchanged: sound-systems, pirate-radio, hip-hop, house-techno, rave-culture, corporate-vs-real. Pytest auto-loads /app/frontend/.env to get REACT_APP_BACKEND_URL.",
+  "rca of the issue": "No issues observed."
+}

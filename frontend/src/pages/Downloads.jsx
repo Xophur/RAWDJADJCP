@@ -1,22 +1,24 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Download, FileText, GraduationCap, BookOpen, Loader2, Eye, Lock } from "lucide-react";
-import { CHAPTERS } from "../data/content";
+import { getProgram } from "../data/programs";
 import { downloadStudentPdf } from "../lib/downloads";
 import { getTeacherToken, downloadTeacherPdf } from "../lib/teacher";
 import { Reveal } from "../components/Reveal";
 
-export default function Downloads() {
+export default function Downloads({ program = "dj" }) {
+  const prog = getProgram(program);
+  const base = prog.base;
   const [loading, setLoading] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const teacherUnlocked = !!getTeacherToken();
+  const teacherUnlocked = !!getTeacherToken(program);
 
   const getStudent = async () => {
     setError("");
     setLoading("student");
     try {
-      await downloadStudentPdf();
+      await downloadStudentPdf(program);
     } catch (e) {
       setError("Download failed. Please try again in a moment.");
     } finally {
@@ -26,16 +28,16 @@ export default function Downloads() {
 
   const getTeacher = async () => {
     if (!teacherUnlocked) {
-      navigate("/teachers-guide");
+      navigate(`${base}/teachers-guide`);
       return;
     }
     setError("");
     setLoading("teacher");
     try {
-      await downloadTeacherPdf();
+      await downloadTeacherPdf(program);
     } catch (e) {
       setError("Teacher access expired — please unlock again with your certificate.");
-      navigate("/teachers-guide");
+      navigate(`${base}/teachers-guide`);
     } finally {
       setLoading("");
     }
@@ -45,24 +47,23 @@ export default function Downloads() {
     <div data-testid="downloads-page" className="relative z-10 pt-24 min-h-screen">
       <div className="max-w-5xl mx-auto px-5 sm:px-8">
         <Reveal>
-          <span className="font-mono-x text-neon-green text-xs uppercase tracking-[0.3em]">Take it offline</span>
+          <span className="font-mono-x text-neon-green text-xs uppercase tracking-[0.3em]">{prog.label} · Take it offline</span>
           <h1 className="mt-4 font-display font-black uppercase tracking-tighter text-4xl sm:text-6xl">
             Down<span className="text-neon-orange">loads</span>
           </h1>
           <p className="mt-5 text-white/75 max-w-2xl leading-relaxed">
             The Student Edition is free for everyone. The Teacher's Edition is unlocked with a valid
-            <span className="text-neon-green font-semibold"> RAWDJA certificate</span>.
+            <span className="text-neon-green font-semibold"> RAWDJA {prog.short} certificate</span>.
           </p>
         </Reveal>
 
         <div className="grid md:grid-cols-2 gap-6 mt-12">
-          {/* Student */}
           <Reveal>
             <div className="bg-cardp border border-neon-green/25 rounded-md p-8 h-full flex flex-col">
               <BookOpen className="w-10 h-10 text-neon-green mb-5" />
               <h2 className="font-display uppercase tracking-tight text-2xl mb-2">Student Edition</h2>
               <p className="text-white/65 text-sm leading-relaxed mb-6 flex-1">
-                The full course: all {CHAPTERS.length} modules, pull quotes, key terms, and the complete glossary.
+                The full {prog.short} course: all {prog.chapters.length} modules, pull quotes, key terms, and the complete glossary.
               </p>
               <div className="flex flex-wrap gap-3">
                 <button
@@ -74,18 +75,13 @@ export default function Downloads() {
                   {loading === "student" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                   {loading === "student" ? "Building PDF…" : "Download PDF"}
                 </button>
-                <Link
-                  to="/print/student"
-                  data-testid="view-student"
-                  className="inline-flex items-center gap-2 border border-white/20 text-white/80 font-bold uppercase tracking-wide text-xs px-5 py-3 rounded-sm hover:border-neon-green hover:text-neon-green transition-all"
-                >
+                <Link to={`${base}/print/student`} data-testid="view-student" className="inline-flex items-center gap-2 border border-white/20 text-white/80 font-bold uppercase tracking-wide text-xs px-5 py-3 rounded-sm hover:border-neon-green hover:text-neon-green transition-all">
                   <Eye className="w-4 h-4" /> View online
                 </Link>
               </div>
             </div>
           </Reveal>
 
-          {/* Teacher */}
           <Reveal delay={0.08}>
             <div className="bg-cardp border border-neon-orange/30 rounded-md p-8 h-full flex flex-col relative">
               {!teacherUnlocked && (
@@ -97,7 +93,7 @@ export default function Downloads() {
               <h2 className="font-display uppercase tracking-tight text-2xl mb-2">Teacher's Edition</h2>
               <p className="text-white/65 text-sm leading-relaxed mb-6 flex-1">
                 Lesson plans, objectives, discussion questions, assessments, glossary, resources & the 3-pass editorial
-                notes. Unlocked with your RAWDJA certificate serial.
+                notes. Unlocked with your RAWDJA {prog.short} certificate serial.
               </p>
               <div className="flex flex-wrap gap-3">
                 <button
@@ -109,11 +105,7 @@ export default function Downloads() {
                   {loading === "teacher" ? <Loader2 className="w-4 h-4 animate-spin" /> : teacherUnlocked ? <Download className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                   {loading === "teacher" ? "Building PDF…" : teacherUnlocked ? "Download PDF" : "Unlock to download"}
                 </button>
-                <Link
-                  to="/teachers-guide"
-                  data-testid="view-teacher"
-                  className="inline-flex items-center gap-2 border border-white/20 text-white/80 font-bold uppercase tracking-wide text-xs px-5 py-3 rounded-sm hover:border-neon-green hover:text-neon-green transition-all"
-                >
+                <Link to={`${base}/teachers-guide`} data-testid="view-teacher" className="inline-flex items-center gap-2 border border-white/20 text-white/80 font-bold uppercase tracking-wide text-xs px-5 py-3 rounded-sm hover:border-neon-green hover:text-neon-green transition-all">
                   <Eye className="w-4 h-4" /> Open guide
                 </Link>
               </div>
