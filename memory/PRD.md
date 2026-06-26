@@ -43,3 +43,12 @@ Xophur — 31-year DJ career. Students: DJ Sivart, Soundjack, GalaxyBoy, Psybod 
 - Ledger wiped to 0 for launch.
 
 ## No auth in this product.
+
+## Course-completion gate added (2026-06-26)
+- P0 fixed: certificates can no longer be claimed by skipping the course. Progress tracked per-program in browser localStorage (/app/frontend/src/lib/progress.js).
+- Chapter.jsx marks each module read on view (useEffect) + scrolls to top.
+- Home.jsx hero: shows "Verify a certificate" (blue) until all modules read, then switches to "Get certified" (green). "Start"/"Resume the course" label adapts to progress.
+- Certificate.jsx: Issue tab locked (lock icon) + page defaults to Verify tab until 100% complete. Locked panel shows progress bar (X/Y modules) and a resume CTA. Verify tab always available.
+- Applies to BOTH DJ and Promoter (shared program-aware components).
+- Note: localStorage only (per-browser) — server-side progress tracking deferred to backlog (acceptable per owner).
+- Verified via screenshots: locked state (0/6) and unlocked state (form + green hero) both correct. Ledger untouched (still 0).

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Award, Printer, ShieldCheck, ShieldAlert, Loader2, Search, Crown } from "lucide-react";
+import { Award, Printer, ShieldCheck, ShieldAlert, Loader2, Search, Crown, Lock } from "lucide-react";
 import api from "../lib/api";
 import { getProgram } from "../data/programs";
 import { RawdjaSeal } from "../components/RawdjaSeal";
 import { Reveal } from "../components/Reveal";
+import { courseProgress } from "../lib/progress";
 
 const fmtDate = (iso) => {
   try {
@@ -79,7 +80,8 @@ function CertificateCard({ cert }) {
 
 export default function Certificate({ program = "dj" }) {
   const prog = getProgram(program);
-  const [tab, setTab] = useState("issue");
+  const progress = courseProgress(program, prog.chapters);
+  const [tab, setTab] = useState(progress.complete ? "issue" : "verify");
   const [name, setName] = useState("");
   const [cert, setCert] = useState(null);
   const [issuing, setIssuing] = useState(false);
@@ -152,9 +154,9 @@ export default function Certificate({ program = "dj" }) {
             <button
               data-testid="tab-issue"
               onClick={() => setTab("issue")}
-              className={`px-6 py-2.5 text-sm font-bold uppercase tracking-wide transition-colors ${tab === "issue" ? "bg-neon-green text-black" : "text-white/70 hover:text-white"}`}
+              className={`px-6 py-2.5 text-sm font-bold uppercase tracking-wide transition-colors inline-flex items-center gap-1.5 ${tab === "issue" ? "bg-neon-green text-black" : "text-white/70 hover:text-white"}`}
             >
-              Issue
+              {!progress.complete && <Lock className="w-3.5 h-3.5" />} Issue
             </button>
             <button
               data-testid="tab-verify"
@@ -165,7 +167,33 @@ export default function Certificate({ program = "dj" }) {
             </button>
           </div>
 
-          {tab === "issue" && (
+          {tab === "issue" && !progress.complete && (
+            <div data-testid="certificate-locked" className="mt-8 bg-cardp border border-neon-orange/30 rounded-md p-6 sm:p-8 text-center">
+              <Lock className="w-10 h-10 text-neon-orange mx-auto mb-4" />
+              <h3 className="font-display uppercase tracking-tight text-xl text-neon-orange">Certificate locked</h3>
+              <p className="mt-3 text-white/70 max-w-md mx-auto leading-relaxed">
+                Certificates are earned, not claimed. Finish reading every module of the {prog.short} course to unlock your official RAWDJA certificate.
+              </p>
+              <div className="mt-6 max-w-sm mx-auto">
+                <div className="flex justify-between font-mono-x text-[10px] uppercase tracking-widest text-white/50 mb-2">
+                  <span>{progress.done} / {progress.total} modules read</span>
+                  <span>{Math.round((progress.done / progress.total) * 100)}%</span>
+                </div>
+                <div className="h-2 bg-ink border border-white/15 rounded-sm overflow-hidden">
+                  <div data-testid="progress-bar-fill" className="h-full bg-neon-green transition-all duration-500" style={{ width: `${(progress.done / progress.total) * 100}%` }} />
+                </div>
+              </div>
+              <a
+                href={`${prog.base}/chapter/${prog.chapters[0].id}`}
+                data-testid="locked-resume-link"
+                className="mt-6 inline-flex items-center gap-2 bg-neon-orange text-black font-bold uppercase tracking-wide px-6 py-3 rounded-sm hover:brightness-110 glow-orange transition-all"
+              >
+                <Award className="w-4 h-4" /> {progress.done > 0 ? "Resume the course" : "Start the course"}
+              </a>
+            </div>
+          )}
+
+          {tab === "issue" && progress.complete && (
             <div className="mt-8 bg-cardp border border-white/10 rounded-md p-6 sm:p-8">
               <label className="font-display uppercase text-sm tracking-tight text-neon-green">Your full DJ name</label>
               <p className="text-white/50 text-xs mt-1 mb-3">This is the name that will appear on your official RAWDJA certificate — use your DJ name exactly how you want it credited.</p>

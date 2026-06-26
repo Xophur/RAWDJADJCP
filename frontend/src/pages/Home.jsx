@@ -1,10 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Headphones, Radio, Disc3, Award, GraduationCap, BookOpen } from "lucide-react";
+import { ArrowRight, Headphones, Radio, Disc3, Award, GraduationCap, BookOpen, ShieldCheck } from "lucide-react";
 import { getProgram, PROGRAMS } from "../data/programs";
 import { RAVE_PHOTOS, RAVE_HERO } from "../data/assets";
 import { Reveal, Equalizer } from "../components/Reveal";
 import { RawdjaSeal } from "../components/RawdjaSeal";
+import { courseProgress } from "../lib/progress";
 
 export default function Home({ program = "dj" }) {
   const prog = getProgram(program);
@@ -13,6 +14,7 @@ export default function Home({ program = "dj" }) {
   const CHAPTERS = prog.chapters;
   const bonus = CHAPTERS.find((c) => c.isBonus) || CHAPTERS[CHAPTERS.length - 1];
   const other = program === "dj" ? PROGRAMS.promoter : PROGRAMS.dj;
+  const progress = courseProgress(program, CHAPTERS);
 
   const stats = [
     { k: String(CHAPTERS.length).padStart(2, "0"), v: "Modules" },
@@ -46,11 +48,17 @@ export default function Home({ program = "dj" }) {
 
           <div className="mt-9 flex flex-wrap gap-4">
             <Link to={`${base}/chapter/${CHAPTERS[0].id}`} data-testid="hero-start-reading" className="group inline-flex items-center gap-2 bg-neon-orange text-black font-bold uppercase tracking-wide px-7 py-3.5 rounded-sm hover:brightness-110 glow-orange transition-all duration-200">
-              Start the course <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              {progress.done > 0 ? "Resume the course" : "Start the course"} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link to={`${base}/certificate`} data-testid="hero-get-certified" className="inline-flex items-center gap-2 border border-neon-green/60 text-neon-green font-bold uppercase tracking-wide px-7 py-3.5 rounded-sm hover:bg-neon-green hover:text-black transition-all duration-200">
-              <Award className="w-4 h-4" /> Get certified
-            </Link>
+            {progress.complete ? (
+              <Link to={`${base}/certificate`} data-testid="hero-get-certified" className="inline-flex items-center gap-2 border border-neon-green/60 text-neon-green font-bold uppercase tracking-wide px-7 py-3.5 rounded-sm hover:bg-neon-green hover:text-black transition-all duration-200">
+                <Award className="w-4 h-4" /> Get certified
+              </Link>
+            ) : (
+              <Link to={`${base}/certificate`} data-testid="hero-verify-certificate" className="inline-flex items-center gap-2 border border-neon-blue/60 text-neon-blue font-bold uppercase tracking-wide px-7 py-3.5 rounded-sm hover:bg-neon-blue hover:text-black transition-all duration-200">
+                <ShieldCheck className="w-4 h-4" /> Verify a certificate
+              </Link>
+            )}
           </div>
 
           <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-px bg-white/10 border border-white/10 rounded-sm overflow-hidden max-w-3xl">

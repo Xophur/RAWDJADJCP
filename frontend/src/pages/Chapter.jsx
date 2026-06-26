@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Clock, Tag } from "lucide-react";
 import { getProgram } from "../data/programs";
 import { RAVE_PHOTOS } from "../data/assets";
 import { Reveal } from "../components/Reveal";
+import { markChapterRead } from "../lib/progress";
 
 export default function Chapter({ program = "dj" }) {
   const prog = getProgram(program);
@@ -12,6 +13,11 @@ export default function Chapter({ program = "dj" }) {
   const chapters = prog.chapters;
   const idx = chapters.findIndex((c) => c.id === id);
   const ch = chapters[idx];
+
+  useEffect(() => {
+    if (ch) markChapterRead(program, ch.id);
+    window.scrollTo(0, 0);
+  }, [program, ch]);
 
   if (!ch) {
     return (
